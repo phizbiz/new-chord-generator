@@ -13,6 +13,11 @@ function App() {
   const [eventIds, setEventIds] = useState(null);
   const [noRepeatChords, setNoRepeatChords] = useState(false);
   const [startWithTonic, setStartWithTonic] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isLoading, setIsLoading] = useState(false);
+
+>>>>>>> c64a30a (loading)
 
   const chords = {
     C: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
@@ -73,6 +78,7 @@ function App() {
       const chordsToPlay = chordProgression.split(' ').map((chord) => {
         return getTriadForChord(chord).map((pitch) => pitchToNoteName(pitch));
       });
+<<<<<<< HEAD
 
       setIsPlaying(true);
       playChords(chordsToPlay, () => {
@@ -83,6 +89,20 @@ function App() {
         setEventIds(eventIdsInstance);
       });
 
+=======
+  
+      setIsLoading(true);
+      playChords(chordsToPlay, () => {
+        setIsPlaying(false);
+        setSynth(null);
+        setIsLoading(false);
+      }).then(({ synth: synthInstance, eventIds: eventIdsInstance }) => {
+        setIsPlaying(true);
+        setSynth(synthInstance);
+        setEventIds(eventIdsInstance);
+      });
+  
+>>>>>>> c64a30a (loading)
     } else {
       setIsPlaying(false);
       if (synth) {
@@ -92,6 +112,10 @@ function App() {
       }
     }
   };
+<<<<<<< HEAD
+=======
+  
+>>>>>>> c64a30a (loading)
 
   // App.js
 
@@ -146,9 +170,19 @@ return (
     </div>
     <button onClick={generateChordProgression}>Generate Chord Progression</button>
     <div className="play-download">
+<<<<<<< HEAD
       <button onClick={togglePlayback}>{isPlaying ? 'Stop' : 'Play'}</button>
       <button onClick={downloadMidi}>Download MIDI</button>
     </div>
+=======
+  <button onClick={togglePlayback}>
+    {isPlaying ? 'Stop' : 'Play'}
+  </button>
+  <button onClick={downloadMidi}>Download MIDI</button>
+</div>
+{isLoading && <div><p>Loading...</p></div>}
+
+>>>>>>> c64a30a (loading)
     
   </div>
 );
