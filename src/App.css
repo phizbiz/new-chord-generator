@@ -123,10 +123,7 @@ select:focus {
 
 .chordProgressionDisplay {
   display: inline-block;
-  width: 200px; /* Adjust this value according to your desired width */
+  width: 200px;
+  height: 200px;
   text-align: center;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> c64a30a (loading)
