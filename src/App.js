@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { playChords, stopChords } from './Playback';
 import { getTriadForChord, pitchToNoteName } from './chords';
 import { generateMidiDataUri } from './midi';
+import BeatSequencer from './BeatSequencer';
 import './App.css';
 
 function App() {
@@ -70,7 +71,7 @@ function App() {
       );
 
       setIsLoading(true);
-      playChords(chordsToPlay, () => {
+      playChords(chordsToPlay, bpm, () => {
         setIsPlaying(false);
         setSynth(null);
         setIsLoading(false);
@@ -165,6 +166,9 @@ function App() {
             Download MIDI
           </button>
         </div>
+
+        <div className="divider" />
+        <BeatSequencer bpm={bpm} />
       </div>
     </div>
   );
