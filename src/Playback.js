@@ -2,6 +2,9 @@
 import * as Tone from 'tone';
 
 export async function playChords(chordProgression, onStop) {
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+
   const synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'sine' },
     envelope: { release: 0.2 },
@@ -9,26 +12,25 @@ export async function playChords(chordProgression, onStop) {
 
   await Tone.start();
 
-  let time = Tone.now();
+  let time = 0;
+  const beatDuration = Tone.Time('1n').toSeconds();
   let eventIds = [];
 
   for (const chord of chordProgression) {
-    if (chord.length > 0) {
-      const eventId = Tone.Transport.scheduleOnce(() => {
-        try {
-          synth.triggerAttackRelease(chord, '1n');
-        } catch (error) {
-          console.error("Error playing chord:", error);
-        }
-      }, time);
-      eventIds.push(eventId);
-    }
-    time += Tone.Time('1n').toSeconds();
+    const eventId = Tone.Transport.scheduleOnce(() => {
+      try {
+        synth.triggerAttackRelease(chord, '1n');
+      } catch (error) {
+        console.error("Error playing chord:", error);
+      }
+    }, time);
+    eventIds.push(eventId);
+    time += beatDuration;
   }
 
   Tone.Transport.scheduleOnce(() => {
     onStop();
-    setTimeout(() => disposeSynth(synth), 300); // Add a short delay before disposing of the synth
+    setTimeout(() => disposeSynth(synth), 300);
   }, time);
 
   Tone.Transport.start();
@@ -37,8 +39,8 @@ export async function playChords(chordProgression, onStop) {
 }
 
 export function stopChords(synth, eventIds) {
-  Tone.Transport.pause();
-  Tone.Transport.seconds = 0;
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
 }
 
 function disposeSynth(synth) {
