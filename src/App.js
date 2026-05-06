@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { playChords, stopChords } from './Playback';
+import React, { useState, useRef } from 'react';
+import * as Tone from 'tone';
+import { scheduleChords, stopChords } from './Playback';
 import { getTriadForChord, pitchToNoteName } from './chords';
 import { generateMidiDataUri } from './midi';
 import BeatSequencer from './BeatSequencer';
@@ -15,6 +16,8 @@ function App() {
   const [noRepeatChords, setNoRepeatChords] = useState(false);
   const [startWithTonic, setStartWithTonic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const beatRef = useRef();
 
   const chords = {
     C: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
@@ -64,30 +67,51 @@ function App() {
     setTimeout(() => document.body.removeChild(link), 100);
   };
 
-  const togglePlayback = () => {
+  const togglePlayback = async () => {
     if (!isPlaying) {
       const chordsToPlay = chordProgression.map((chord) =>
         getTriadForChord(chord).map((pitch) => pitchToNoteName(pitch))
       );
 
       setIsLoading(true);
-      playChords(chordsToPlay, bpm, () => {
-        setIsPlaying(false);
-        setSynth(null);
-        setIsLoading(false);
-      }).then(({ synth: synthInstance, eventIds: eventIdsInstance }) => {
-        setIsPlaying(true);
-        setSynth(synthInstance);
-        setEventIds(eventIdsInstance);
-        setIsLoading(false);
-      });
-    } else {
-      setIsPlaying(false);
-      if (synth) {
-        stopChords(synth, eventIds);
-        setSynth(null);
-        setEventIds(null);
+
+      // Reset Transport so beat and chords start together at time 0
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
+      Tone.Transport.bpm.value = bpm;
+
+      // Schedule beat (if steps are set)
+      if (beatRef.current?.hasActiveSteps()) {
+        beatRef.current.schedule();
       }
+
+      // Schedule chords
+      const { synth: synthInstance, eventIds: eventIdsInstance } = await scheduleChords(
+        chordsToPlay,
+        bpm,
+        () => {
+          setIsPlaying(false);
+          setSynth(null);
+          beatRef.current?.stop();
+        }
+      );
+
+      // Start Transport — beat and chords fire together
+      Tone.Transport.start();
+
+      setIsPlaying(true);
+      setSynth(synthInstance);
+      setEventIds(eventIdsInstance);
+      setIsLoading(false);
+
+    } else {
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
+      stopChords(synth, eventIds);
+      beatRef.current?.stop();
+      setSynth(null);
+      setEventIds(null);
+      setIsPlaying(false);
     }
   };
 
@@ -168,7 +192,7 @@ function App() {
         </div>
 
         <div className="divider" />
-        <BeatSequencer bpm={bpm} />
+        <BeatSequencer ref={beatRef} bpm={bpm} isPlaying={isPlaying} />
       </div>
     </div>
   );
