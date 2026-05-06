@@ -75,6 +75,9 @@ function App() {
 
       setIsLoading(true);
 
+      // Must initialize AudioContext first (requires user gesture)
+      await Tone.start();
+
       // Reset Transport so beat and chords start together at time 0
       Tone.Transport.stop();
       Tone.Transport.cancel();

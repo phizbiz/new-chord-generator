@@ -9,7 +9,6 @@ export async function scheduleChords(chordProgression, bpm, loop, onStop) {
     envelope: { release: 0.2 },
   }).toDestination();
 
-  await Tone.start();
   Tone.Transport.bpm.value = bpm;
 
   const beatDuration = Tone.Time('1n').toSeconds();
