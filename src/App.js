@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import * as Tone from 'tone';
-import { scheduleChords, stopChords } from './Playback';
+import { scheduleChords } from './Playback';
 import { getTriadForChord, pitchToNoteName } from './chords';
 import { generateMidiDataUri } from './midi';
 import BeatSequencer from './BeatSequencer';
@@ -11,8 +11,7 @@ function App() {
   const [bpm, setBpm] = useState(120);
   const [key, setKey] = useState('C');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [synth, setSynth] = useState(null);
-  const [eventIds, setEventIds] = useState(null);
+  const stopChordsRef = useRef(null);
   const [noRepeatChords, setNoRepeatChords] = useState(false);
   const [startWithTonic, setStartWithTonic] = useState(false);
   const [loop, setLoop] = useState(false);
@@ -87,32 +86,33 @@ function App() {
       }
 
       // Schedule chords
-      const { synth: synthInstance, eventIds: eventIdsInstance } = await scheduleChords(
+      const { stop } = await scheduleChords(
         chordsToPlay,
         bpm,
         loop,
         () => {
           setIsPlaying(false);
-          setSynth(null);
+          stopChordsRef.current = null;
           beatRef.current?.stop();
         }
       );
+
+      stopChordsRef.current = stop;
 
       // Start Transport — beat and chords fire together
       Tone.Transport.start();
 
       setIsPlaying(true);
-      setSynth(synthInstance);
-      setEventIds(eventIdsInstance);
       setIsLoading(false);
 
     } else {
       Tone.Transport.stop();
       Tone.Transport.cancel();
-      stopChords(synth, eventIds);
+      if (stopChordsRef.current) {
+        stopChordsRef.current();
+        stopChordsRef.current = null;
+      }
       beatRef.current?.stop();
-      setSynth(null);
-      setEventIds(null);
       setIsPlaying(false);
     }
   };
