@@ -9,7 +9,6 @@ export async function playChords(chordProgression, onStop) {
 
   await Tone.start();
 
-  const totalTime = chordProgression.filter(chord => chord.length > 0).length * Tone.Time('1n').toSeconds();
   let time = Tone.now();
   let eventIds = [];
 

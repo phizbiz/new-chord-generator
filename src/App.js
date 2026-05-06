@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { playChords, stopChords } from './Playback';
-import { getPitchForChord, getTriadForChord, pitchToNoteName } from './chords';
+import { getTriadForChord, pitchToNoteName } from './chords';
 import { generateMidiDataUri } from './midi';
 import './App.css';
 
