@@ -2,7 +2,7 @@
 import * as Tone from 'tone';
 
 // Schedules chords at absolute Transport time 0+. Caller must start Transport.
-export async function scheduleChords(chordProgression, bpm, onStop) {
+export async function scheduleChords(chordProgression, bpm, loop, onStop) {
   const synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'sine' },
     envelope: { release: 0.2 },
@@ -12,6 +12,7 @@ export async function scheduleChords(chordProgression, bpm, onStop) {
   Tone.Transport.bpm.value = bpm;
 
   const beatDuration = Tone.Time('1n').toSeconds();
+  const totalDuration = chordProgression.length * beatDuration;
   let time = 0;
   let eventIds = [];
 
@@ -27,16 +28,24 @@ export async function scheduleChords(chordProgression, bpm, onStop) {
     time += beatDuration;
   }
 
-  const endId = Tone.Transport.scheduleOnce(() => {
-    onStop();
-    setTimeout(() => disposeSynth(synth), 300);
-  }, time);
-  eventIds.push(endId);
+  if (loop) {
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = 0;
+    Tone.Transport.loopEnd = totalDuration;
+  } else {
+    Tone.Transport.loop = false;
+    const endId = Tone.Transport.scheduleOnce(() => {
+      onStop();
+      setTimeout(() => disposeSynth(synth), 300);
+    }, time);
+    eventIds.push(endId);
+  }
 
   return { synth, eventIds };
 }
 
 export function stopChords(synth, eventIds) {
+  Tone.Transport.loop = false;
   if (eventIds) eventIds.forEach(id => Tone.Transport.clear(id));
   if (synth) disposeSynth(synth);
 }

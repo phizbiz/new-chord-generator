@@ -303,3 +303,22 @@ body {
   font-size: 0.8rem;
   padding: 0.4rem 0.9rem;
 }
+
+.btn-loop-off {
+  background-color: var(--secondary);
+  color: var(--text-muted);
+}
+
+.btn-loop-off:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+  color: var(--text);
+}
+
+.btn-loop-on {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-loop-on:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}

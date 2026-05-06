@@ -15,6 +15,7 @@ function App() {
   const [eventIds, setEventIds] = useState(null);
   const [noRepeatChords, setNoRepeatChords] = useState(false);
   const [startWithTonic, setStartWithTonic] = useState(false);
+  const [loop, setLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const beatRef = useRef();
@@ -89,6 +90,7 @@ function App() {
       const { synth: synthInstance, eventIds: eventIdsInstance } = await scheduleChords(
         chordsToPlay,
         bpm,
+        loop,
         () => {
           setIsPlaying(false);
           setSynth(null);
@@ -168,6 +170,13 @@ function App() {
             />
             Start with Tonic
           </label>
+          <button
+            className={`btn btn-sm ${loop ? 'btn-loop-on' : 'btn-loop-off'}`}
+            onClick={() => setLoop(l => !l)}
+            disabled={isPlaying}
+          >
+            {loop ? '⟳ Loop On' : '⟳ Loop'}
+          </button>
         </div>
 
         <button className="btn btn-primary" onClick={generateChordProgression}>
